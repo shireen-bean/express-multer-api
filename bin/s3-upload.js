@@ -4,6 +4,7 @@ require('dotenv').config();
 const fs = require('fs');
 const fileType = require('file-type');
 const AWS = require('aws-sdk');
+const crypto = require('crypto');
 
 const s3 = new AWS.S3({
   credentials: {
@@ -12,7 +13,6 @@ const s3 = new AWS.S3({
   },
 });
 
-let filename = process.argv[2] || '';
 
 // creating helper function in case file-type cant identify type of file-type
 //helper will assugn default and must return object
@@ -24,25 +24,42 @@ const mimeType = (data) => {
   }, fileType(data)); //overwrites defaults
 };
 
-const awsUpload = (file) => {
-  const options = {
-    ACL: "public-read",
-    Body: file.data,
-    Bucket: 'shireen-wdi-bucket',
-    ContentType: file.mime,
-    Key: `test/test.${file.ext}`
-  };
-
-  return new Promise((resolve, reject)=> {
-    s3.upload(options, (error, data)=>{
-      if (error) {
+const randomHexString = (length) => {
+  return new Promise((resolve, reject)=>{
+    crypto.randomBytes(length, (error,buffer)=>{
+      if(error){
         reject(error);
       }
-
-      resolve(data)
-    })
-  })
+      resolve(buffer.toString('hex'));
+    });
+  });
 };
+
+const awsUpload = (file) => {
+  return randomHexString(16)
+  .then((filename)=>{
+    let dir = new Date().toISOString().split('T')[0];
+    return {
+      ACL: "public-read",
+      Body: file.data,
+      Bucket: 'shireen-wdi-bucket',
+      ContentType: file.mime,
+      Key: `${dir}/${filename}.${file.ext}`
+    };
+  })
+  .then((options)=>{
+    return new Promise((resolve, reject)=> {
+      s3.upload(options, (error, data)=>{
+        if (error) {
+          reject(error);
+        }
+        resolve(data);
+      });
+    });
+  });
+};
+
+let filename = process.argv[2] || '';
 
 const readFile = (filename) => {
   return new Promise ((resolve, reject)=>{
