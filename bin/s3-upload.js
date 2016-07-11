@@ -27,7 +27,7 @@ const readFile = (filename) => {
 
 
 readFile(filename)
-.then(uploader.prepareFile)
+// .then(uploader.prepareFile)
 .then(uploader.awsUpload)
 .then((response)=>{
   let upload = {

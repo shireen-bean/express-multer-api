@@ -12,7 +12,7 @@ const uploadSchema = new mongoose.Schema({
     required: true,
   },
 }, {
-  toJSON: { virtuals: true },
+  // toJSON: { virtuals: true },
   timestamps: true,
 });
 
