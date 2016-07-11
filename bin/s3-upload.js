@@ -40,7 +40,7 @@ readFile(filename)
 })
 .then(console.log)
 .catch(console.error)
-.then(()=>mongoose.conection.close());
+.then(() => mongoose.conection.close());
 
 
 
